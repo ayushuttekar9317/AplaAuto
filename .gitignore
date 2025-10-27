@@ -1,2 +1,18 @@
+# Flutter related
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+
+# IDE files
+.idea/
+*.iml
+
+# Environment / secrets
 *.env
 .env
+
+# Others
+pubspec.lock
+
