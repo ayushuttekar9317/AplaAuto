@@ -18,10 +18,10 @@ class _MapScreenState extends State<MapScreen> {
   final Completer<GoogleMapController> _controller = Completer();
   LatLng? _currentPosition;
   Set<Marker> _markers = {};
-  Set<Polyline> _polylines = {};
+  final Set<Polyline> _polylines = {};
 
   // put your google api key here (for polyline)
-  final String apiKey = "YOUR_GOOGLE_MAPS_API_KEY";
+  final String apiKey = "AIzaSyBcmIaqYJySA8ucOYLzprY4kasrjyqbI_I";
 
   @override
   void initState() {
@@ -63,9 +63,7 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _updateCameraPosition() async {
     if (_controller.isCompleted && _currentPosition != null) {
       final controller = await _controller.future;
-      controller.animateCamera(
-        CameraUpdate.newLatLng(_currentPosition!),
-      );
+      controller.animateCamera(CameraUpdate.newLatLng(_currentPosition!));
     }
   }
 
@@ -84,8 +82,9 @@ class _MapScreenState extends State<MapScreen> {
             markerId: const MarkerId("destination"),
             position: widget.destination!,
             infoWindow: const InfoWindow(title: "Drop Location"),
-            icon:
-                BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueRed,
+            ),
           )
         : null;
 
@@ -94,13 +93,16 @@ class _MapScreenState extends State<MapScreen> {
 
     if (widget.stops != null) {
       for (int i = 0; i < widget.stops!.length; i++) {
-        markers.add(Marker(
-          markerId: MarkerId("stop_$i"),
-          position: widget.stops![i],
-          infoWindow: InfoWindow(title: "Stop ${i + 1}"),
-          icon:
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-        ));
+        markers.add(
+          Marker(
+            markerId: MarkerId("stop_$i"),
+            position: widget.stops![i],
+            infoWindow: InfoWindow(title: "Stop ${i + 1}"),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueAzure,
+            ),
+          ),
+        );
       }
     }
 
@@ -112,40 +114,40 @@ class _MapScreenState extends State<MapScreen> {
       await _drawRoute(_currentPosition!, widget.destination!);
     }
   }
-Future<void> _drawRoute(LatLng origin, LatLng destination) async {
-  PolylinePoints polylinePoints = PolylinePoints();
 
-  // ✅ New: Create a PolylineRequest object
-  final request = PolylineRequest(
-    origin: PointLatLng(origin.latitude, origin.longitude),
-    destination: PointLatLng(destination.latitude, destination.longitude),
-    mode: TravelMode.driving,
-  );
+  Future<void> _drawRoute(LatLng origin, LatLng destination) async {
+    PolylinePoints polylinePoints = PolylinePoints();
 
-  // ✅ Pass the request and API key
-  PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-    request: request,
-    googleApiKey: apiKey,
-  );
+    // ✅ Create a PolylineRequest
+    final request = PolylineRequest(
+      origin: PointLatLng(origin.latitude, origin.longitude),
+      destination: PointLatLng(destination.latitude, destination.longitude),
+      mode: TravelMode.driving,
+    );
 
-  if (result.points.isNotEmpty) {
-    List<LatLng> polylineCoordinates = result.points
-        .map((point) => LatLng(point.latitude, point.longitude))
-        .toList();
+    // ✅ Fetch the route using the new method
+    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+      request: request,
+      googleApiKey: apiKey,
+    );
 
-    setState(() {
-      _polylines.add(
-        Polyline(
-          polylineId: const PolylineId('route'),
-          color: Colors.blue,
-          width: 5,
-          points: polylineCoordinates,
-        ),
-      );
-    });
+    if (result.points.isNotEmpty) {
+      List<LatLng> polylineCoordinates = result.points
+          .map((point) => LatLng(point.latitude, point.longitude))
+          .toList();
+
+      setState(() {
+        _polylines.add(
+          Polyline(
+            polylineId: const PolylineId('route'),
+            color: Colors.blue,
+            width: 5,
+            points: polylineCoordinates,
+          ),
+        );
+      });
+    }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
